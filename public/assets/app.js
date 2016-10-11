@@ -7,5 +7,6 @@ $(document).ready(function () {
 function refreshPartial() {
   $.ajax({
     url: "/"
- })
+  });
+  $(".container").load(location.href + " .container");
 }

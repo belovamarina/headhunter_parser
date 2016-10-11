@@ -16,32 +16,38 @@ class HeadHunterWorker
   def perform(query="ruby")
     page = Nokogiri::HTML(open("https://spb.hh.ru/search/vacancy?text=#{query}&area=2"))
 
-    page.xpath("//div[@class='search-result-description']").map do |div|
-      vacancy_params = {  link: div.xpath(".//a[contains(@class, 'item__name')]/@href").text,
-                          name: div.xpath(".//a[contains(@class, 'item__name')]").text,
-                          website_id: div.xpath(".//a[contains(@class, 'item__name')]/@href").text[/\/(\d+)/, 1].to_i,
-                          short_description: div.xpath("div/div[contains(@class, 'snippet')]").map(&:text).join("\n"),
-                          company_link: "https://spb.hh.ru" + div.xpath(".//div[contains(@class, 'company')]/a/@href").text,
-                          company_name: div.xpath(".//div[contains(@class, 'company')]/a").text }
+    loop do
+      page.xpath("//div[@class='search-result-description']").map do |div|
+        vacancy_params = {  link: div.xpath(".//a[contains(@class, 'item__name')]/@href").text,
+                            name: div.xpath(".//a[contains(@class, 'item__name')]").text,
+                            website_id: div.xpath(".//a[contains(@class, 'item__name')]/@href").text[/\/(\d+)/, 1].to_i,
+                            short_description: div.xpath("div/div[contains(@class, 'snippet')]").map(&:text).join("\n"),
+                            company_link: "https://spb.hh.ru" + div.xpath(".//div[contains(@class, 'company')]/a/@href").text,
+                            company_name: div.xpath(".//div[contains(@class, 'company')]/a").text }
 
-      if salary = div.at_xpath(".//div[contains(@class, 'salary')]")
-        vacancy_params = vacancy_params.merge(parse_salary(salary.text))
+        if salary = div.at_xpath(".//div[contains(@class, 'salary')]")
+          vacancy_params = vacancy_params.merge(parse_salary(salary.text))
+        end
+
+        sleep rand(3..8)
+
+        vacancy_page = Nokogiri::HTML(open(vacancy_params[:link]))
+        vacancy_params[:description] = vacancy_page.xpath("//div[@class='b-vacancy-desc-wrapper']").text
+        puts vacancy_params
+
+        Vacancy.create_with(vacancy_params).find_or_create_by(website_id: vacancy_params[:website_id])
       end
+
+      next_page = page.at_xpath("//div[@class='b-pager__next']/a[text()='следующая']/@href") rescue break
+      page = Nokogiri::HTML(open("https://spb.hh.ru" + next_page.text))
       sleep rand(3..8)
-
-      vacancy_page = Nokogiri::HTML(open(vacancy_params[:link]))
-      vacancy_params[:description] = vacancy_page.xpath("//div[@class='b-vacancy-desc-wrapper']").text
-
-      puts vacancy_params
-      Vacancy.create_with(vacancy_params).find_or_create_by(website_id: vacancy_params[:website_id])
     end
   end
 end
 
-
 get '/' do
   @vacancies = Vacancy.order(created_at: :desc)
-  slim :index, :layout => (request.xhr? ? false : :layout)
+  slim :index
 end
 
 get '/grab_vacancies' do
