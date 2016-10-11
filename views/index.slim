@@ -1,0 +1,21 @@
+- @vacancies.each do |vacancy|
+  .container
+    .well
+      .media
+        a class="pull-left" href="#"
+          img class="media-object" src="http://placekitten.com/150/150"
+
+        .media-body
+          h4 class="media-heading" =vacancy.name
+          h4 class="media-heading" от #{vacancy.salary_from} #{vacancy.currency}
+          p class="text-right"
+            a href="#{vacancy.company_link}" =vacancy.company_name
+          p =vacancy.short_description
+          ul class="list-inline list-unstyled"
+            li
+              i class="glyphicon glyphicon-calendar"
+              span =vacancy.created_at.strftime("%F")
+            li
+              i class="glyphicon glyphicon-link"
+              span
+                a href="#{vacancy.link}" Подробнее
