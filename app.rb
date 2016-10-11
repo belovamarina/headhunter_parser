@@ -14,7 +14,7 @@ class HeadHunterWorker
   include Sidekiq::Worker
 
   def perform(query="ruby")
-    page = Nokogiri::HTML(open("https://spb.hh.ru/search/vacancy?text=ruby&area=2"))
+    page = Nokogiri::HTML(open("https://spb.hh.ru/search/vacancy?text=#{query}&area=2"))
 
     page.xpath("//div[@class='search-result-description']").map do |div|
       vacancy_params = {  link: div.xpath(".//a[contains(@class, 'item__name')]/@href").text,
@@ -41,7 +41,7 @@ end
 
 get '/' do
   @vacancies = Vacancy.order(created_at: :desc)
-  slim :index
+  slim :index, :layout => (request.xhr? ? false : :layout)
 end
 
 get '/grab_vacancies' do

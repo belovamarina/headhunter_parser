@@ -1,5 +1,5 @@
 configure :development do
- set :database, { adapter: "sqlite3", database: "headhunter.sqlite3" }
+ set :database, { adapter: "sqlite3", database: "headhunter.sqlite3", pool: 25 }
  set :show_exceptions, true
 end
 
