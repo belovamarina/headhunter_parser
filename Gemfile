@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
+gem 'addressable'
 gem 'sinatra'
 gem 'slim'
-gem 'activerecord', '4.2.5'
+gem 'activerecord'
 gem 'sinatra-activerecord'
 gem 'rake'
 gem 'thin'
 gem 'nokogiri'
 gem 'sidekiq'
+gem 'will_paginate', '~> 3.1.0'
 
 group :development do
   gem 'shotgun'

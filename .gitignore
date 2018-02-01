@@ -1,3 +1,4 @@
 *.sqlite3
 .byebug_history
-crawler.rb
+dump.rdb
+.idea/
