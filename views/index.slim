@@ -3,7 +3,7 @@
     .well
       .media
         a.pull-left href="#"
-          img.media-object src="http://placekitten.com/150/150"
+          img.media-object src="http://placekitten.com/g/150/150"
 
         .media-body
           h4.media-heading =vacancy.name
@@ -19,3 +19,6 @@
               i.glyphicon.glyphicon-link
               span
                 a href="#{vacancy.link}" Подробнее
+
+nav.pagination
+  == will_paginate(@vacancies)
